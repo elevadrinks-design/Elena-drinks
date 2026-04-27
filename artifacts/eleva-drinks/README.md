@@ -31,16 +31,16 @@ pnpm --filter @workspace/eleva-drinks run dev
 ## 🔑 Admin Login
 
 - Open the app
-- **Long-press** the "Eleva Drinks" logo for ~1 second  
-  (or tap the invisible button in the top-right corner of the header)
+- Tap the **⚙️ gear icon** in the top-right corner of the header  
+  (or long-press the "Eleva Drinks" logo for ~1 second)
 - Enter:
-  - **ID:** `admin`
-  - **Password:** `fuelbar123`
+  - **ID:** `eleva1`
+  - **Password:** `eleva123drinks`
 
 To change the password, edit the credentials check in `script.js`:
 
 ```js
-if (u === 'admin' && p === 'fuelbar123') { ... }
+if (u === 'eleva1' && p === 'eleva123drinks') { ... }
 ```
 
 ## ☁️ Deploy

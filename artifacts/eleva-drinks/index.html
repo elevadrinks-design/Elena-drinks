@@ -21,7 +21,12 @@
         </div>
         <p class="brand-tag">Fresh Juice &amp; Protein Shakes</p>
       </div>
-      <button class="hidden-admin-trigger" id="hiddenAdminBtn" aria-label="admin"></button>
+      <button class="admin-gear-btn" id="hiddenAdminBtn" aria-label="Admin login" title="Admin">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
     </header>
 
     <!-- ===== CATEGORY TABS ===== -->
@@ -62,14 +67,16 @@
           <label for="orderNote">Add a note (optional)</label>
           <textarea id="orderNote" rows="2" placeholder="No sugar, less ice, extra protein..."></textarea>
         </div>
-        <div class="cart-actions">
-          <button class="btn btn-ghost" data-close>Keep Shopping</button>
-          <button class="btn btn-primary" id="checkoutBtn">Order Now</button>
+        <div class="cart-actions cart-actions-stacked">
+          <button class="btn btn-primary block" id="checkoutWhatsappBtn">
+            <span class="btn-icon">🟢</span> Order via WhatsApp
+          </button>
+          <button class="btn btn-ghost block" id="moreOptionsBtn">More options</button>
         </div>
       </div>
     </div>
 
-    <!-- ===== CHECKOUT MODAL (channel pick) ===== -->
+    <!-- ===== CHECKOUT MODAL (more channels) ===== -->
     <div class="modal" id="checkoutModal" hidden>
       <div class="modal-overlay" data-close></div>
       <div class="modal-sheet">
@@ -82,7 +89,7 @@
           <button class="channel-btn channel-whatsapp" data-channel="whatsapp">
             <span class="channel-icon">🟢</span>
             <span class="channel-name">WhatsApp</span>
-            <span class="channel-tag">Recommended</span>
+            <span class="channel-tag">Default</span>
           </button>
           <button class="channel-btn channel-viber" data-channel="viber">
             <span class="channel-icon">🟣</span>
@@ -260,6 +267,13 @@
           <label>Image URL (optional)
             <input type="url" id="prodImage" placeholder="https://...">
           </label>
+          <label>Or upload image from device
+            <input type="file" id="prodImageFile" accept="image/*">
+          </label>
+          <div class="image-preview" id="prodImagePreview" hidden>
+            <img id="prodImagePreviewImg" alt="Preview">
+            <button type="button" class="btn btn-ghost small" id="prodImageClearBtn">Remove image</button>
+          </div>
           <label>Emoji <small>(shown if no image)</small>
             <input type="text" id="prodEmoji" maxlength="4" placeholder="🥤">
           </label>

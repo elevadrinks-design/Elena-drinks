@@ -87,29 +87,22 @@ function toast(msg) {
 }
 
 // ------------------------------ MENU RENDER
-function categories() {
-  const set = new Set(state.products.map(p => p.category));
-  return ['all', ...Array.from(set)];
-}
+// Fixed category list — always show all four buttons
+const CATEGORIES = ['All', 'Protein Shakes', 'Summer Drinks', 'Snacks'];
 
 function renderTabs() {
   const wrap = $('#categoryTabs');
   wrap.innerHTML = '';
-  categories().forEach(cat => {
+  CATEGORIES.forEach(cat => {
     const btn = document.createElement('button');
-    btn.className = 'cat-tab' + (state.activeCategory === cat ? ' active' : '');
-    btn.textContent = cat === 'all' ? 'All' : cat;
+    const key = cat === 'All' ? 'all' : cat;
+    btn.className = 'cat-tab' + (state.activeCategory === key ? ' active' : '');
+    btn.textContent = cat;
     btn.addEventListener('click', () => {
-      state.activeCategory = cat;
+      state.activeCategory = key;
       renderTabs();
       renderMenu();
-      // Scroll to category section if filter applied
-      if (cat !== 'all') {
-        const target = document.getElementById('cat-' + slug(cat));
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
     wrap.appendChild(btn);
   });
@@ -128,7 +121,8 @@ function renderMenu() {
   visible.forEach(p => { (byCat[p.category] = byCat[p.category] || []).push(p); });
 
   if (Object.keys(byCat).length === 0) {
-    container.innerHTML = '<div class="empty-state">No products available yet.</div>';
+    const label = state.activeCategory === 'all' ? 'No products available yet.' : `No products in "${state.activeCategory}" yet.`;
+    container.innerHTML = `<div class="empty-state">${escapeHtml(label)}</div>`;
     return;
   }
 
@@ -360,8 +354,14 @@ $('#openCartBtn').addEventListener('click', () => {
   openModal('#cartModal');
 });
 
-// Cart -> Checkout
-$('#checkoutBtn').addEventListener('click', () => {
+// Cart -> WhatsApp (default, one tap)
+$('#checkoutWhatsappBtn').addEventListener('click', () => {
+  if (cartLines().length === 0) { toast('Cart is empty'); return; }
+  checkoutVia('whatsapp');
+});
+
+// Cart -> More options (Viber / Messenger / Instagram)
+$('#moreOptionsBtn').addEventListener('click', () => {
   if (cartLines().length === 0) { toast('Cart is empty'); return; }
   closeModal('#cartModal');
   openModal('#checkoutModal');
@@ -394,7 +394,7 @@ $('#adminLoginForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const u = $('#adminUser').value.trim();
   const p = $('#adminPass').value;
-  if (u === 'admin' && p === 'fuelbar123') {
+  if (u === 'eleva1' && p === 'eleva123drinks') {
     closeModal('#adminLoginModal');
     openAdmin();
   } else {
@@ -478,11 +478,48 @@ function openProductForm(productId) {
   $('#prodCategory').value = p?.category || 'Protein Shakes';
   $('#prodDesc').value     = p?.desc || '';
   $('#prodImage').value    = p?.image || '';
+  $('#prodImageFile').value = '';
   $('#prodEmoji').value    = p?.emoji || '🥤';
   $('#prodAvailable').checked = p ? p.available : true;
   $('#deleteProductBtn').style.display = p ? '' : 'none';
+  updateImagePreview(p?.image || '');
   openModal('#productModal');
 }
+
+function updateImagePreview(src) {
+  const wrap = $('#prodImagePreview');
+  const img  = $('#prodImagePreviewImg');
+  if (src) {
+    img.src = src;
+    wrap.hidden = false;
+  } else {
+    img.removeAttribute('src');
+    wrap.hidden = true;
+  }
+}
+
+// File upload -> base64 (max ~2MB to keep localStorage sane)
+$('#prodImageFile').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('Please select an image file'); return; }
+  if (file.size > 2 * 1024 * 1024) { toast('Image too large (max 2MB)'); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    $('#prodImage').value = reader.result;
+    updateImagePreview(reader.result);
+  };
+  reader.onerror = () => toast('Failed to read image');
+  reader.readAsDataURL(file);
+});
+
+$('#prodImage').addEventListener('input', (e) => updateImagePreview(e.target.value.trim()));
+
+$('#prodImageClearBtn').addEventListener('click', () => {
+  $('#prodImage').value = '';
+  $('#prodImageFile').value = '';
+  updateImagePreview('');
+});
 
 $('#productForm').addEventListener('submit', (e) => {
   e.preventDefault();
