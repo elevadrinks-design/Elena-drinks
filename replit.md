@@ -25,3 +25,16 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+
+## Eleva Drinks Artifact (pure-static)
+
+Located at `artifacts/eleva-drinks/`. This artifact intentionally has **no** `package.json`, `node_modules`, TypeScript, Vite, or backend. It contains exactly three deliverable files plus a README:
+
+- `index.html` — full markup
+- `style.css` — dark gym theme
+- `script.js` — all logic (cart, admin, sales, checkout) using `localStorage`
+- `README.md`
+
+The Replit dev preview uses `npx -y http-server` to serve the directory (no project install). Production deploy serves the same files statically — no build step. To publish on Vercel, just upload these three files.
+
+Do NOT add a `package.json`, `vite.config.*`, `tsconfig.json`, or any `src/` folder back into this artifact — it must stay pure static.

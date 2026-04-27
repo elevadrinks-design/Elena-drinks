@@ -15,11 +15,10 @@ paths = [ "/" ]
 localPort = 23549
 
 [services.development]
-run = "pnpm --filter @workspace/eleva-drinks run dev"
+run = "npx -y http-server . -p $PORT -a 0.0.0.0 -c-1 --silent"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/eleva-drinks", "run", "build" ]
-publicDir = "artifacts/eleva-drinks/dist/public"
+publicDir = "artifacts/eleva-drinks"
 serve = "static"
 
 [[services.production.rewrites]]
@@ -28,4 +27,3 @@ to = "/index.html"
 
 [services.env]
 PORT = "23549"
-BASE_PATH = "/"

@@ -20,13 +20,15 @@ Built with **vanilla HTML / CSS / JavaScript** — no frameworks, no backend, no
 
 ## 🏃 Run Locally
 
-This app is **pure static HTML** — you can simply double-click `index.html` to open it.
+This app is **pure static HTML** — just double-click `index.html` to open it in your browser. No install, no build, no Node, no npm.
 
-For a smoother dev experience inside this monorepo:
-
-```bash
-pnpm --filter @workspace/eleva-drinks run dev
 ```
+index.html
+style.css
+script.js
+```
+
+That's it. Three files. No `package.json`, no `node_modules`, no TypeScript, no backend.
 
 ## 🔑 Admin Login
 
