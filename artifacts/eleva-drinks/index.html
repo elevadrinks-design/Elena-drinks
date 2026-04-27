@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <title>Eleva Drinks 💪</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='58%25' text-anchor='middle' font-size='38' font-family='Arial' font-weight='900' fill='%2300ff88'%3EE%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <!-- ===== TOP HEADER ===== -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand" id="brandLogo">
+          <span class="brand-name" id="brandName">Eleva Drinks</span>
+          <span class="brand-emoji">💪</span>
+        </div>
+        <p class="brand-tag">Fresh Juice &amp; Protein Shakes</p>
+      </div>
+      <button class="hidden-admin-trigger" id="hiddenAdminBtn" aria-label="admin"></button>
+    </header>
+
+    <!-- ===== CATEGORY TABS ===== -->
+    <nav class="category-tabs" id="categoryTabs"></nav>
+
+    <!-- ===== MENU ===== -->
+    <main class="menu-wrap">
+      <div id="menuContainer"></div>
+      <div class="footer-pad"></div>
+    </main>
+
+    <!-- ===== STICKY CART BAR ===== -->
+    <div class="cart-bar" id="cartBar" hidden>
+      <button class="cart-bar-btn" id="openCartBtn">
+        <div class="cart-bar-left">
+          <span class="cart-count" id="cartCount">0</span>
+          <span class="cart-label">View Cart</span>
+        </div>
+        <div class="cart-bar-right">
+          <span class="cart-total" id="cartTotal">Rs. 0</span>
+          <span class="cart-arrow">→</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- ===== CART MODAL ===== -->
+    <div class="modal" id="cartModal" hidden>
+      <div class="modal-overlay" data-close></div>
+      <div class="modal-sheet cart-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h2>Your Order</h2>
+          <button class="icon-btn" data-close aria-label="close">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-summary" id="cartSummary"></div>
+        <div class="cart-note">
+          <label for="orderNote">Add a note (optional)</label>
+          <textarea id="orderNote" rows="2" placeholder="No sugar, less ice, extra protein..."></textarea>
+        </div>
+        <div class="cart-actions">
+          <button class="btn btn-ghost" data-close>Keep Shopping</button>
+          <button class="btn btn-primary" id="checkoutBtn">Order Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CHECKOUT MODAL (channel pick) ===== -->
+    <div class="modal" id="checkoutModal" hidden>
+      <div class="modal-overlay" data-close></div>
+      <div class="modal-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h2>Send order via</h2>
+          <button class="icon-btn" data-close aria-label="close">✕</button>
+        </div>
+        <div class="channel-grid">
+          <button class="channel-btn channel-whatsapp" data-channel="whatsapp">
+            <span class="channel-icon">🟢</span>
+            <span class="channel-name">WhatsApp</span>
+            <span class="channel-tag">Recommended</span>
+          </button>
+          <button class="channel-btn channel-viber" data-channel="viber">
+            <span class="channel-icon">🟣</span>
+            <span class="channel-name">Viber</span>
+          </button>
+          <button class="channel-btn channel-messenger" data-channel="messenger">
+            <span class="channel-icon">🔵</span>
+            <span class="channel-name">Messenger</span>
+          </button>
+          <button class="channel-btn channel-instagram" data-channel="instagram">
+            <span class="channel-icon">🟠</span>
+            <span class="channel-name">Instagram</span>
+          </button>
+        </div>
+        <p class="checkout-hint">We will open the app with your order pre-filled. Just hit send.</p>
+      </div>
+    </div>
+
+    <!-- ===== ADMIN LOGIN MODAL ===== -->
+    <div class="modal" id="adminLoginModal" hidden>
+      <div class="modal-overlay" data-close></div>
+      <div class="modal-sheet small">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h2>Admin Login</h2>
+          <button class="icon-btn" data-close aria-label="close">✕</button>
+        </div>
+        <form id="adminLoginForm" class="admin-form">
+          <label>ID
+            <input type="text" id="adminUser" autocomplete="off" required>
+          </label>
+          <label>Password
+            <input type="password" id="adminPass" autocomplete="off" required>
+          </label>
+          <p class="form-error" id="adminLoginError" hidden>Invalid credentials</p>
+          <button type="submit" class="btn btn-primary block">Login</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== ADMIN DASHBOARD ===== -->
+    <div class="admin-screen" id="adminScreen" hidden>
+      <header class="admin-header">
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p class="admin-sub">Manage your business</p>
+        </div>
+        <button class="btn btn-ghost small" id="adminLogoutBtn">Logout</button>
+      </header>
+
+      <nav class="admin-tabs">
+        <button class="admin-tab active" data-admin-tab="products">Products</button>
+        <button class="admin-tab" data-admin-tab="settings">Settings</button>
+        <button class="admin-tab" data-admin-tab="sales">Sales</button>
+        <button class="admin-tab" data-admin-tab="orders">Orders</button>
+      </nav>
+
+      <!-- Products tab -->
+      <section class="admin-panel" data-admin-panel="products">
+        <div class="admin-section-head">
+          <h2>Products</h2>
+          <button class="btn btn-primary small" id="addProductBtn">+ Add Product</button>
+        </div>
+        <div id="adminProductList" class="admin-product-list"></div>
+      </section>
+
+      <!-- Settings tab -->
+      <section class="admin-panel" data-admin-panel="settings" hidden>
+        <h2>Business Settings</h2>
+        <form id="settingsForm" class="admin-form wide">
+          <label>App Name
+            <input type="text" id="setAppName" required>
+          </label>
+          <label>WhatsApp Number <small>(with country code, no +)</small>
+            <input type="tel" id="setWhatsapp" required pattern="[0-9]+">
+          </label>
+          <label>Viber Number <small>(optional)</small>
+            <input type="tel" id="setViber">
+          </label>
+          <label>Messenger Username <small>(optional, e.g. yourpage)</small>
+            <input type="text" id="setMessenger">
+          </label>
+          <label>Instagram Username <small>(optional)</small>
+            <input type="text" id="setInstagram">
+          </label>
+          <div class="row">
+            <label class="check-row">
+              <input type="checkbox" id="setDeliveryOn">
+              <span>Enable Delivery Charge</span>
+            </label>
+            <label>Delivery Amount (Rs.)
+              <input type="number" id="setDeliveryAmt" min="0">
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+          <p class="form-success" id="settingsSavedMsg" hidden>Saved!</p>
+        </form>
+
+        <div class="danger-zone">
+          <h3>Reset</h3>
+          <button class="btn btn-danger small" id="resetProductsBtn">Reset Products to Defaults</button>
+        </div>
+      </section>
+
+      <!-- Sales tab -->
+      <section class="admin-panel" data-admin-panel="sales" hidden>
+        <h2>Offline Sales Tracker</h2>
+        <form id="offlineSaleForm" class="admin-form inline">
+          <label class="grow">Item
+            <select id="offlineItemSelect"></select>
+          </label>
+          <label>Qty
+            <input type="number" id="offlineQty" min="1" value="1" required>
+          </label>
+          <button type="submit" class="btn btn-primary">+ Log Sale</button>
+        </form>
+
+        <div class="sales-summary">
+          <div class="stat-card">
+            <span class="stat-label">Today</span>
+            <span class="stat-value" id="salesToday">Rs. 0</span>
+            <span class="stat-sub" id="salesTodayCount">0 items</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">All-Time</span>
+            <span class="stat-value" id="salesAllTime">Rs. 0</span>
+            <span class="stat-sub" id="salesAllCount">0 items</span>
+          </div>
+        </div>
+
+        <h3>Recent Sales</h3>
+        <div id="salesList" class="sales-list"></div>
+      </section>
+
+      <!-- Orders tab -->
+      <section class="admin-panel" data-admin-panel="orders" hidden>
+        <h2>Online Orders</h2>
+        <p class="muted-text">Orders sent from the app are logged here automatically.</p>
+        <div id="ordersList" class="sales-list"></div>
+      </section>
+    </div>
+
+    <!-- ===== PRODUCT EDIT MODAL ===== -->
+    <div class="modal" id="productModal" hidden>
+      <div class="modal-overlay" data-close></div>
+      <div class="modal-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h2 id="productModalTitle">Edit Product</h2>
+          <button class="icon-btn" data-close aria-label="close">✕</button>
+        </div>
+        <form id="productForm" class="admin-form">
+          <input type="hidden" id="prodId">
+          <label>Name
+            <input type="text" id="prodName" required>
+          </label>
+          <div class="row">
+            <label>Price (Rs.)
+              <input type="number" id="prodPrice" min="0" required>
+            </label>
+            <label>Discount %
+              <input type="number" id="prodDiscount" min="0" max="100" value="0">
+            </label>
+          </div>
+          <label>Category
+            <select id="prodCategory">
+              <option>Protein Shakes</option>
+              <option>Summer Drinks</option>
+              <option>Snacks</option>
+            </select>
+          </label>
+          <label>Description (optional)
+            <input type="text" id="prodDesc">
+          </label>
+          <label>Image URL (optional)
+            <input type="url" id="prodImage" placeholder="https://...">
+          </label>
+          <label>Emoji <small>(shown if no image)</small>
+            <input type="text" id="prodEmoji" maxlength="4" placeholder="🥤">
+          </label>
+          <label class="check-row">
+            <input type="checkbox" id="prodAvailable" checked>
+            <span>Available (uncheck for Sold Out)</span>
+          </label>
+          <div class="row">
+            <button type="submit" class="btn btn-primary grow">Save</button>
+            <button type="button" class="btn btn-danger" id="deleteProductBtn">Delete</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast" hidden></div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

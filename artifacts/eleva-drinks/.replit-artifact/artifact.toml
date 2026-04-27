@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Eleva Drinks"
+version = "1.0.0"
+id = "artifacts/eleva-drinks"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23549
+
+[services.development]
+run = "pnpm --filter @workspace/eleva-drinks run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/eleva-drinks", "run", "build" ]
+publicDir = "artifacts/eleva-drinks/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23549"
+BASE_PATH = "/"
