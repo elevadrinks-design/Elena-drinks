@@ -1,4 +1,4 @@
-<! DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -289,7 +289,31 @@
       </div>
     </div>
 
+    <!-- ===== CONFIRM ORDER MODAL ===== -->
+    <div class="modal" id="confirmOrderModal" hidden>
+      <div class="modal-overlay" data-close></div>
+      <div class="modal-sheet small">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h2>Confirm your order</h2>
+          <button class="icon-btn" data-close aria-label="close">✕</button>
+        </div>
+        <div class="confirm-body">
+          <div class="confirm-summary" id="confirmOrderSummary"></div>
+          <p class="confirm-note">We'll open <strong id="confirmChannelName">WhatsApp</strong> with your order pre-filled. Tap <em>Confirm</em> to send, or <em>Cancel</em> to clear your cart and start over.</p>
+        </div>
+        <div class="cart-actions cart-actions-stacked">
+          <button class="btn btn-primary block" id="confirmOrderBtn">✅ Confirm Order</button>
+          <button class="btn btn-danger block" id="cancelOrderBtn">✕ Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== TOAST ===== -->
     <div class="toast" id="toast" hidden></div>
 
+    <!-- Supabase JS (CDN) — pure browser, no Node, no build -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="./script.js"></script>
+  </body>
+</html>
