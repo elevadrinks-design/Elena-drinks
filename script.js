@@ -1,11 +1,33 @@
 /* ==========================================================
    ELEVA DRINKS – Vanilla JS App
-   - Renders dynamic menu from products array
-   - Cart in localStorage
+   - Pure static (no build, no Node, no backend code)
+   - Supabase (CDN) for live product sync, with localStorage fallback
+   - Cloudinary unsigned upload for product images
    - WhatsApp / Viber / Messenger / Instagram checkout
-   - Hidden admin panel (long-press logo OR top-right corner tap)
-   - Admin: products, settings, discounts, offline sales tracker
+   - Hidden admin panel (gear button OR long-press logo)
    ========================================================== */
+
+// ------------------------------ SUPABASE CONFIG
+const SUPABASE_URL  = 'https://advwqrupribbecgaxsst.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_u0exIuE-mWxmdevk2dlrJw_Fo7KtQrt';
+
+let sb = null;
+try {
+  if (window.supabase && typeof window.supabase.createClient === 'function') {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+      auth: { persistSession: false },
+    });
+  }
+} catch (err) {
+  console.warn('Supabase init failed; falling back to localStorage only.', err);
+  sb = null;
+}
+
+// ------------------------------ CLOUDINARY CONFIG
+const CLOUDINARY = {
+  cloudName: 'dszl6lfeu',
+  uploadPreset: 'eleva_upload',
+};
 
 // ------------------------------ STORAGE KEYS
 const KEYS = {
@@ -76,6 +98,91 @@ const todayKey = () => new Date().toISOString().slice(0,10);
 function discountedPrice(p) {
   if (!p.discount || p.discount <= 0) return p.price;
   return Math.round(p.price * (100 - p.discount) / 100);
+}
+
+// ------------------------------ SUPABASE / CLOUDINARY HELPERS
+// Map between local product shape (uses `desc`) and Supabase row (uses `description`)
+function productToRow(p) {
+  return {
+    id: p.id,
+    name: p.name,
+    price: Number(p.price) || 0,
+    category: p.category || '',
+    description: p.desc || '',
+    image: p.image || '',
+    emoji: p.emoji || '🥤',
+    available: p.available !== false,
+    discount: Number(p.discount) || 0,
+  };
+}
+function productFromRow(r) {
+  return {
+    id: r.id,
+    name: r.name,
+    price: Number(r.price) || 0,
+    category: r.category || '',
+    desc: r.description || '',
+    image: r.image || '',
+    emoji: r.emoji || '🥤',
+    available: r.available !== false,
+    discount: Number(r.discount) || 0,
+  };
+}
+
+async function loadProductsRemote() {
+  if (!sb) return null;
+  try {
+    const { data, error } = await sb
+      .from('products')
+      .select('*')
+      .order('category', { ascending: true })
+      .order('name', { ascending: true });
+    if (error) throw error;
+    if (!Array.isArray(data)) return null;
+    return data.map(productFromRow);
+  } catch (err) {
+    console.warn('Supabase load failed, using local cache:', err.message || err);
+    return null;
+  }
+}
+
+async function upsertProductRemote(p) {
+  if (!sb) return { ok: false, reason: 'offline' };
+  try {
+    const { error } = await sb.from('products').upsert(productToRow(p), { onConflict: 'id' });
+    if (error) throw error;
+    return { ok: true };
+  } catch (err) {
+    console.warn('Supabase upsert failed:', err.message || err);
+    return { ok: false, reason: err.message || String(err) };
+  }
+}
+
+async function deleteProductRemote(id) {
+  if (!sb) return { ok: false, reason: 'offline' };
+  try {
+    const { error } = await sb.from('products').delete().eq('id', id);
+    if (error) throw error;
+    return { ok: true };
+  } catch (err) {
+    console.warn('Supabase delete failed:', err.message || err);
+    return { ok: false, reason: err.message || String(err) };
+  }
+}
+
+// Cloudinary unsigned upload — returns the secure_url string, or null on failure
+async function uploadImageCloudinary(file) {
+  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY.uploadPreset);
+  const res = await fetch(url, { method: 'POST', body: fd });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '');
+    throw new Error(`Cloudinary ${res.status}: ${txt.slice(0, 200)}`);
+  }
+  const json = await res.json();
+  return json.secure_url || json.url || null;
 }
 
 function toast(msg) {
@@ -338,7 +445,7 @@ function checkoutVia(channel) {
 function openModal(id) { $(id).hidden = false; document.body.style.overflow = 'hidden'; }
 function closeModal(id) { $(id).hidden = true; document.body.style.overflow = ''; }
 function closeAllModals() {
-  ['#cartModal','#checkoutModal','#adminLoginModal','#productModal'].forEach(closeModal);
+  ['#cartModal','#checkoutModal','#adminLoginModal','#productModal','#confirmOrderModal'].forEach(closeModal);
 }
 
 document.addEventListener('click', (e) => {
@@ -354,10 +461,10 @@ $('#openCartBtn').addEventListener('click', () => {
   openModal('#cartModal');
 });
 
-// Cart -> WhatsApp (default, one tap)
+// Cart -> WhatsApp (default) — opens Confirm Order modal first
 $('#checkoutWhatsappBtn').addEventListener('click', () => {
   if (cartLines().length === 0) { toast('Cart is empty'); return; }
-  checkoutVia('whatsapp');
+  openConfirmOrder('whatsapp');
 });
 
 // Cart -> More options (Viber / Messenger / Instagram)
@@ -367,9 +474,53 @@ $('#moreOptionsBtn').addEventListener('click', () => {
   openModal('#checkoutModal');
 });
 
-// Channel pick
+// Channel pick — also goes through Confirm Order modal
 $$('#checkoutModal .channel-btn').forEach(btn => {
-  btn.addEventListener('click', () => checkoutVia(btn.dataset.channel));
+  btn.addEventListener('click', () => openConfirmOrder(btn.dataset.channel));
+});
+
+// ------------------------------ CONFIRM / CANCEL ORDER FLOW
+let pendingChannel = null;
+const CHANNEL_LABEL = {
+  whatsapp: 'WhatsApp',
+  viber: 'Viber',
+  messenger: 'Messenger',
+  instagram: 'Instagram',
+};
+
+function openConfirmOrder(channel) {
+  if (cartLines().length === 0) { toast('Cart is empty'); return; }
+  pendingChannel = channel;
+  const { lines, total } = cartTotals();
+  const itemsHtml = lines.map(l =>
+    `<div class="confirm-line"><span>${escapeHtml(l.product.name)} × ${l.qty}</span><span>${fmt(l.total)}</span></div>`
+  ).join('');
+  $('#confirmOrderSummary').innerHTML =
+    itemsHtml +
+    `<div class="confirm-line confirm-total"><span>Total</span><span>${fmt(total)}</span></div>`;
+  $('#confirmChannelName').textContent = CHANNEL_LABEL[channel] || 'your messaging app';
+  closeModal('#cartModal');
+  closeModal('#checkoutModal');
+  openModal('#confirmOrderModal');
+}
+
+$('#confirmOrderBtn').addEventListener('click', () => {
+  const ch = pendingChannel;
+  pendingChannel = null;
+  closeModal('#confirmOrderModal');
+  if (ch) checkoutVia(ch);
+});
+
+$('#cancelOrderBtn').addEventListener('click', () => {
+  pendingChannel = null;
+  // Per spec: Cancel = clear cart, reset UI, stay on page
+  state.cart = {};
+  const note = $('#orderNote'); if (note) note.value = '';
+  persist();
+  closeAllModals();
+  renderMenu();
+  renderCartBar();
+  toast('Order cancelled');
 });
 
 // ------------------------------ ADMIN ENTRY
@@ -456,9 +607,11 @@ function renderAdminProducts() {
       </div>
     `;
     $('[data-act=edit]', row).onclick = () => openProductForm(p.id);
-    $('[data-act=toggle]', row).onclick = () => {
+    $('[data-act=toggle]', row).onclick = async () => {
       p.available = !p.available;
       persist(); renderAdminProducts(); renderMenu();
+      const r = await upsertProductRemote(p);
+      if (!r.ok && sb) toast('Toggle saved locally — sync failed');
     };
     list.appendChild(row);
   });
@@ -498,19 +651,30 @@ function updateImagePreview(src) {
   }
 }
 
-// File upload -> base64 (max ~2MB to keep localStorage sane)
-$('#prodImageFile').addEventListener('change', (e) => {
+// File upload -> Cloudinary (unsigned). Falls back to base64 in localStorage if upload fails.
+$('#prodImageFile').addEventListener('change', async (e) => {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
   if (!file.type.startsWith('image/')) { toast('Please select an image file'); return; }
-  if (file.size > 2 * 1024 * 1024) { toast('Image too large (max 2MB)'); return; }
-  const reader = new FileReader();
-  reader.onload = () => {
-    $('#prodImage').value = reader.result;
-    updateImagePreview(reader.result);
-  };
-  reader.onerror = () => toast('Failed to read image');
-  reader.readAsDataURL(file);
+  if (file.size > 8 * 1024 * 1024) { toast('Image too large (max 8MB)'); return; }
+  toast('Uploading image…');
+  try {
+    const url = await uploadImageCloudinary(file);
+    if (!url) throw new Error('No URL returned');
+    $('#prodImage').value = url;
+    updateImagePreview(url);
+    toast('Image uploaded ✅');
+  } catch (err) {
+    console.warn('Cloudinary upload failed, falling back to base64:', err);
+    toast('Cloud upload failed, saving locally');
+    const reader = new FileReader();
+    reader.onload = () => {
+      $('#prodImage').value = reader.result;
+      updateImagePreview(reader.result);
+    };
+    reader.onerror = () => toast('Failed to read image');
+    reader.readAsDataURL(file);
+  }
 });
 
 $('#prodImage').addEventListener('input', (e) => updateImagePreview(e.target.value.trim()));
@@ -521,7 +685,7 @@ $('#prodImageClearBtn').addEventListener('click', () => {
   updateImagePreview('');
 });
 
-$('#productForm').addEventListener('submit', (e) => {
+$('#productForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const data = {
     id: $('#prodId').value || uid(),
@@ -544,9 +708,11 @@ $('#productForm').addEventListener('submit', (e) => {
   renderTabs();
   renderMenu();
   toast('Product saved');
+  const r = await upsertProductRemote(data);
+  if (!r.ok && sb) toast('Saved locally — sync failed');
 });
 
-$('#deleteProductBtn').addEventListener('click', () => {
+$('#deleteProductBtn').addEventListener('click', async () => {
   const id = $('#prodId').value;
   if (!id) return;
   if (!confirm('Delete this product?')) return;
@@ -559,6 +725,8 @@ $('#deleteProductBtn').addEventListener('click', () => {
   renderMenu();
   renderCartBar();
   toast('Product deleted');
+  const r = await deleteProductRemote(id);
+  if (!r.ok && sb) toast('Deleted locally — sync failed');
 });
 
 // ------------------------------ ADMIN: SETTINGS
@@ -591,8 +759,8 @@ $('#settingsForm').addEventListener('submit', (e) => {
   toast('Settings saved');
 });
 
-$('#resetProductsBtn').addEventListener('click', () => {
-  if (!confirm('Reset all products to defaults? This cannot be undone.')) return;
+$('#resetProductsBtn').addEventListener('click', async () => {
+  if (!confirm('Reset all products to defaults? This will overwrite the live menu (Supabase too) and cannot be undone.')) return;
   state.products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
   state.cart = {};
   persist();
@@ -601,6 +769,16 @@ $('#resetProductsBtn').addEventListener('click', () => {
   renderMenu();
   renderCartBar();
   toast('Products reset');
+  if (sb) {
+    try {
+      const rows = state.products.map(productToRow);
+      const { error } = await sb.from('products').upsert(rows, { onConflict: 'id' });
+      if (error) throw error;
+    } catch (err) {
+      console.warn('Reset sync failed:', err.message || err);
+      toast('Reset locally — sync failed');
+    }
+  }
 });
 
 function applyBranding() {
@@ -724,14 +902,39 @@ function escapeHtml(s) {
 function escapeAttr(s) { return escapeHtml(s).replace(/`/g, '&#96;'); }
 
 // ------------------------------ INIT
-function init() {
-  // First-time defaults
+async function init() {
+  // First-time defaults (so first paint always has something)
   if (!localStorage.getItem(KEYS.products)) {
     saveStore(KEYS.products, DEFAULT_PRODUCTS);
+    state.products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
   }
   applyBranding();
   renderTabs();
   renderMenu();
   renderCartBar();
+
+  // Try to pull live products from Supabase (non-blocking for UI)
+  if (sb) {
+    const remote = await loadProductsRemote();
+    if (remote && remote.length > 0) {
+      state.products = remote;
+      saveStore(KEYS.products, remote);
+      renderTabs();
+      renderMenu();
+      renderCartBar();
+      if (!document.querySelector('.admin-screen')?.hidden === false) {
+        // refresh admin views silently if open
+        try { renderAdminProducts(); } catch {}
+      }
+    } else if (remote && remote.length === 0) {
+      // First-time: seed Supabase with the defaults so the menu shows up live
+      try {
+        const rows = state.products.map(productToRow);
+        await sb.from('products').upsert(rows, { onConflict: 'id' });
+      } catch (err) {
+        console.warn('Initial seed to Supabase failed:', err.message || err);
+      }
+    }
+  }
 }
 init();
