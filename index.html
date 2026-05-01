@@ -12,7 +12,8 @@
     <link rel="stylesheet" href="./style.css">
   </head>
   <body>
-    <!-- ===== TOP HEADER ===== -->
+
+    <!-- ===== CUSTOMER: TOP HEADER ===== -->
     <header class="app-header">
       <div class="header-inner">
         <div class="brand" id="brandLogo">
@@ -29,16 +30,16 @@
       </button>
     </header>
 
-    <!-- ===== CATEGORY TABS ===== -->
+    <!-- ===== CUSTOMER: CATEGORY TABS ===== -->
     <nav class="category-tabs" id="categoryTabs"></nav>
 
-    <!-- ===== MENU ===== -->
+    <!-- ===== CUSTOMER: MENU ===== -->
     <main class="menu-wrap">
       <div id="menuContainer"></div>
       <div class="footer-pad"></div>
     </main>
 
-    <!-- ===== STICKY CART BAR ===== -->
+    <!-- ===== CUSTOMER: STICKY CART BAR ===== -->
     <div class="cart-bar" id="cartBar" hidden>
       <button class="cart-bar-btn" id="openCartBtn">
         <div class="cart-bar-left">
@@ -76,7 +77,7 @@
       </div>
     </div>
 
-    <!-- ===== CHECKOUT MODAL (more channels) ===== -->
+    <!-- ===== CHECKOUT MODAL ===== -->
     <div class="modal" id="checkoutModal" hidden>
       <div class="modal-overlay" data-close></div>
       <div class="modal-sheet">
@@ -108,128 +109,49 @@
       </div>
     </div>
 
+    <!-- ===== CONFIRM ORDER MODAL ===== -->
+    <div class="modal" id="confirmOrderModal" hidden>
+      <div class="modal-overlay" data-close></div>
+      <div class="modal-sheet small">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h2>Confirm your order</h2>
+          <button class="icon-btn" data-close aria-label="close">✕</button>
+        </div>
+        <div class="confirm-body">
+          <div class="confirm-summary" id="confirmOrderSummary"></div>
+          <p class="confirm-note">We'll open <strong id="confirmChannelName">WhatsApp</strong> with your order pre-filled. Tap <em>Confirm</em> to send, or <em>Cancel</em> to clear your cart.</p>
+        </div>
+        <div class="cart-actions cart-actions-stacked">
+          <button class="btn btn-primary block" id="confirmOrderBtn">✅ Confirm Order</button>
+          <button class="btn btn-danger block" id="cancelOrderBtn">✕ Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== ADMIN LOGIN MODAL ===== -->
     <div class="modal" id="adminLoginModal" hidden>
       <div class="modal-overlay" data-close></div>
       <div class="modal-sheet small">
         <div class="sheet-handle"></div>
-        <div class="sheet-header">
-          <h2>Admin Login</h2>
-          <button class="icon-btn" data-close aria-label="close">✕</button>
+        <div class="login-brand">
+          <div class="login-logo">E</div>
+          <div>
+            <div class="login-brand-name">Eleva Drinks</div>
+            <div class="login-brand-sub">Admin Access</div>
+          </div>
         </div>
         <form id="adminLoginForm" class="admin-form">
-          <label>ID
-            <input type="text" id="adminUser" autocomplete="off" required>
+          <label>Admin ID
+            <input type="text" id="adminUser" autocomplete="off" required placeholder="eleva1">
           </label>
           <label>Password
             <input type="password" id="adminPass" autocomplete="off" required>
           </label>
-          <p class="form-error" id="adminLoginError" hidden>Invalid credentials</p>
-          <button type="submit" class="btn btn-primary block">Login</button>
+          <p class="form-error" id="adminLoginError" hidden>Invalid credentials. Try again.</p>
+          <button type="submit" class="btn btn-primary block">Login →</button>
         </form>
       </div>
-    </div>
-
-    <!-- ===== ADMIN DASHBOARD ===== -->
-    <div class="admin-screen" id="adminScreen" hidden>
-      <header class="admin-header">
-        <div>
-          <h1>Admin Dashboard</h1>
-          <p class="admin-sub">Manage your business</p>
-        </div>
-        <button class="btn btn-ghost small" id="adminLogoutBtn">Logout</button>
-      </header>
-
-      <nav class="admin-tabs">
-        <button class="admin-tab active" data-admin-tab="products">Products</button>
-        <button class="admin-tab" data-admin-tab="settings">Settings</button>
-        <button class="admin-tab" data-admin-tab="sales">Sales</button>
-        <button class="admin-tab" data-admin-tab="orders">Orders</button>
-      </nav>
-
-      <!-- Products tab -->
-      <section class="admin-panel" data-admin-panel="products">
-        <div class="admin-section-head">
-          <h2>Products</h2>
-          <button class="btn btn-primary small" id="addProductBtn">+ Add Product</button>
-        </div>
-        <div id="adminProductList" class="admin-product-list"></div>
-      </section>
-
-      <!-- Settings tab -->
-      <section class="admin-panel" data-admin-panel="settings" hidden>
-        <h2>Business Settings</h2>
-        <form id="settingsForm" class="admin-form wide">
-          <label>App Name
-            <input type="text" id="setAppName" required>
-          </label>
-          <label>WhatsApp Number <small>(with country code, no +)</small>
-            <input type="tel" id="setWhatsapp" required pattern="[0-9]+">
-          </label>
-          <label>Viber Number <small>(optional)</small>
-            <input type="tel" id="setViber">
-          </label>
-          <label>Messenger Username <small>(optional, e.g. yourpage)</small>
-            <input type="text" id="setMessenger">
-          </label>
-          <label>Instagram Username <small>(optional)</small>
-            <input type="text" id="setInstagram">
-          </label>
-          <div class="row">
-            <label class="check-row">
-              <input type="checkbox" id="setDeliveryOn">
-              <span>Enable Delivery Charge</span>
-            </label>
-            <label>Delivery Amount (Rs.)
-              <input type="number" id="setDeliveryAmt" min="0">
-            </label>
-          </div>
-          <button type="submit" class="btn btn-primary">Save Settings</button>
-          <p class="form-success" id="settingsSavedMsg" hidden>Saved!</p>
-        </form>
-
-        <div class="danger-zone">
-          <h3>Reset</h3>
-          <button class="btn btn-danger small" id="resetProductsBtn">Reset Products to Defaults</button>
-        </div>
-      </section>
-
-      <!-- Sales tab -->
-      <section class="admin-panel" data-admin-panel="sales" hidden>
-        <h2>Offline Sales Tracker</h2>
-        <form id="offlineSaleForm" class="admin-form inline">
-          <label class="grow">Item
-            <select id="offlineItemSelect"></select>
-          </label>
-          <label>Qty
-            <input type="number" id="offlineQty" min="1" value="1" required>
-          </label>
-          <button type="submit" class="btn btn-primary">+ Log Sale</button>
-        </form>
-
-        <div class="sales-summary">
-          <div class="stat-card">
-            <span class="stat-label">Today</span>
-            <span class="stat-value" id="salesToday">Rs. 0</span>
-            <span class="stat-sub" id="salesTodayCount">0 items</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">All-Time</span>
-            <span class="stat-value" id="salesAllTime">Rs. 0</span>
-            <span class="stat-sub" id="salesAllCount">0 items</span>
-          </div>
-        </div>
-
-        <h3>Recent Sales</h3>
-        <div id="salesList" class="sales-list"></div>
-      </section>
-
-      <!-- Orders tab -->
-      <section class="admin-panel" data-admin-panel="orders" hidden>
-        <h2>Online Orders</h2>
-        <p class="muted-text">Orders sent from the app are logged here automatically.</p>
-        <div id="ordersList" class="sales-list"></div>
-      </section>
     </div>
 
     <!-- ===== PRODUCT EDIT MODAL ===== -->
@@ -261,6 +183,16 @@
               <option>Snacks</option>
             </select>
           </label>
+          <div class="row">
+            <label class="check-row">
+              <input type="checkbox" id="prodBestseller">
+              <span>🏆 Bestseller</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" id="prodRecommended">
+              <span>⭐ Recommended</span>
+            </label>
+          </div>
           <label>Description (optional)
             <input type="text" id="prodDesc">
           </label>
@@ -289,30 +221,347 @@
       </div>
     </div>
 
-    <!-- ===== CONFIRM ORDER MODAL ===== -->
-    <div class="modal" id="confirmOrderModal" hidden>
+    <!-- ===== EXPENSE MODAL ===== -->
+    <div class="modal" id="expenseModal" hidden>
       <div class="modal-overlay" data-close></div>
-      <div class="modal-sheet small">
+      <div class="modal-sheet">
         <div class="sheet-handle"></div>
         <div class="sheet-header">
-          <h2>Confirm your order</h2>
-          <button class="icon-btn" data-close aria-label="close">✕</button>
+          <h2 id="expenseModalTitle">Add Expense</h2>
+          <button class="icon-btn" data-close>✕</button>
         </div>
-        <div class="confirm-body">
-          <div class="confirm-summary" id="confirmOrderSummary"></div>
-          <p class="confirm-note">We'll open <strong id="confirmChannelName">WhatsApp</strong> with your order pre-filled. Tap <em>Confirm</em> to send, or <em>Cancel</em> to clear your cart and start over.</p>
-        </div>
-        <div class="cart-actions cart-actions-stacked">
-          <button class="btn btn-primary block" id="confirmOrderBtn">✅ Confirm Order</button>
-          <button class="btn btn-danger block" id="cancelOrderBtn">✕ Cancel</button>
-        </div>
+        <form id="expenseForm" class="admin-form">
+          <input type="hidden" id="expId">
+          <label>Item / Description
+            <input type="text" id="expItem" required placeholder="e.g. Banana 2kg, Whey 1kg">
+          </label>
+          <div class="row">
+            <label>Category
+              <select id="expCategory">
+                <option>Fruits</option>
+                <option>Milk</option>
+                <option>Protein / Whey</option>
+                <option>Sugar</option>
+                <option>Electricity</option>
+                <option>Rent</option>
+                <option>Transport</option>
+                <option>Staff Pay</option>
+                <option>Packaging</option>
+                <option>Misc</option>
+              </select>
+            </label>
+            <label>Amount (Rs.)
+              <input type="number" id="expAmount" min="0" required placeholder="0">
+            </label>
+          </div>
+          <label>Date
+            <input type="date" id="expDate" required>
+          </label>
+          <label>Note (optional)
+            <input type="text" id="expNote" placeholder="Vendor, receipt #, etc.">
+          </label>
+          <div class="row">
+            <button type="submit" class="btn btn-primary grow">Save</button>
+            <button type="button" class="btn btn-danger" id="deleteExpenseBtn" style="display:none">Delete</button>
+          </div>
+        </form>
       </div>
     </div>
+
+    <!-- ===== INVESTMENT MODAL ===== -->
+    <div class="modal" id="investmentModal" hidden>
+      <div class="modal-overlay" data-close></div>
+      <div class="modal-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+          <h2 id="investModalTitle">Add Investment Item</h2>
+          <button class="icon-btn" data-close>✕</button>
+        </div>
+        <form id="investmentForm" class="admin-form">
+          <input type="hidden" id="investId">
+          <label>Item Name
+            <input type="text" id="investItem" required placeholder="e.g. Blender, Deep Freeze">
+          </label>
+          <div class="row">
+            <label>Category
+              <select id="investCategory">
+                <option>Equipment</option>
+                <option>Furniture</option>
+                <option>Renovation</option>
+                <option>Inventory</option>
+                <option>Packaging</option>
+                <option>Licenses</option>
+                <option>Misc</option>
+              </select>
+            </label>
+            <label>Amount (Rs.)
+              <input type="number" id="investAmount" min="0" required placeholder="0">
+            </label>
+          </div>
+          <label>Vendor / Supplier (optional)
+            <input type="text" id="investVendor" placeholder="e.g. Bhatbhateni, Amazon">
+          </label>
+          <div class="row">
+            <label>Date
+              <input type="date" id="investDate" required>
+            </label>
+            <label>Status
+              <select id="investStatus">
+                <option value="bought">✅ Bought</option>
+                <option value="pending">⏳ Pending</option>
+              </select>
+            </label>
+          </div>
+          <label class="check-row">
+            <input type="checkbox" id="investPaid" checked>
+            <span>Paid</span>
+          </label>
+          <label>Notes (optional)
+            <input type="text" id="investNotes" placeholder="Receipt #, warranty info...">
+          </label>
+          <div class="row">
+            <button type="submit" class="btn btn-primary grow">Save</button>
+            <button type="button" class="btn btn-danger" id="deleteInvestmentBtn" style="display:none">Delete</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== ADMIN DASHBOARD ===== -->
+    <div class="admin-screen" id="adminScreen" hidden>
+
+      <!-- Sidebar overlay (mobile) -->
+      <div class="adm-overlay" id="admOverlay"></div>
+
+      <!-- Sidebar -->
+      <nav class="adm-sidebar" id="admSidebar">
+        <div class="adm-brand">
+          <div class="adm-logo-circle">E</div>
+          <div class="adm-brand-text">
+            <div class="adm-brand-name">Eleva Drinks</div>
+            <div class="adm-brand-role">Business Dashboard</div>
+          </div>
+        </div>
+
+        <ul class="adm-nav-list">
+          <li><button class="adm-nav-btn active" data-section="overview"><span class="nav-icon">📊</span><span>Overview</span></button></li>
+          <li><button class="adm-nav-btn" data-section="pos"><span class="nav-icon">🧾</span><span>Take Order</span></button></li>
+          <li><button class="adm-nav-btn" data-section="orders"><span class="nav-icon">📋</span><span>Orders</span></button></li>
+          <li><button class="adm-nav-btn" data-section="products"><span class="nav-icon">🥤</span><span>Products</span></button></li>
+          <li><button class="adm-nav-btn" data-section="expenses"><span class="nav-icon">💸</span><span>Expenses</span></button></li>
+          <li><button class="adm-nav-btn" data-section="investment"><span class="nav-icon">💰</span><span>Investment</span></button></li>
+          <li><button class="adm-nav-btn" data-section="analytics"><span class="nav-icon">📈</span><span>Analytics</span></button></li>
+          <li><button class="adm-nav-btn" data-section="settings"><span class="nav-icon">⚙️</span><span>Settings</span></button></li>
+        </ul>
+
+        <button class="adm-exit-btn" id="adminLogoutBtn">↩ Exit Admin</button>
+      </nav>
+
+      <!-- Main content area -->
+      <div class="adm-main" id="admMain">
+
+        <!-- Mobile top bar -->
+        <header class="adm-topbar">
+          <button class="adm-hamburger" id="admHamburger" aria-label="Menu">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <span class="adm-topbar-title" id="admTopbarTitle">Overview</span>
+          <button class="btn btn-ghost small" id="adminLogoutBtn2">Exit</button>
+        </header>
+
+        <!-- ── OVERVIEW ── -->
+        <section class="adm-panel" data-panel="overview">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Overview</h2>
+              <p class="panel-sub" id="overviewDate"></p>
+            </div>
+            <button class="btn btn-ghost small" id="exportAllBtn">⬇ Full Backup</button>
+          </div>
+          <div class="kpi-grid" id="kpiGrid"></div>
+          <div class="pnl-row" id="pnlRow"></div>
+          <div class="dash-section">
+            <div class="dash-section-head">
+              <h3>Recent Orders</h3>
+              <button class="link-btn" data-goto="orders">View all →</button>
+            </div>
+            <div id="recentOrdersList"></div>
+          </div>
+          <div class="dash-section">
+            <h3>Top Sellers</h3>
+            <div id="topSellersOverview"></div>
+          </div>
+        </section>
+
+        <!-- ── POS / TAKE ORDER ── -->
+        <section class="adm-panel" data-panel="pos" hidden>
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Take Order</h2>
+              <p class="panel-sub">Staff / walk-in order entry</p>
+            </div>
+          </div>
+          <div class="pos-greeting">Hi! What would you like today? 😊</div>
+          <div class="pos-config">
+            <input type="text" id="posCustomerName" class="pos-input" placeholder="Customer name (optional)">
+            <div class="pos-config-row">
+              <select id="posOrderType" class="pos-select">
+                <option value="dine-in">🍽 Dine In</option>
+                <option value="takeaway">🥡 Takeaway</option>
+              </select>
+              <select id="posPayment" class="pos-select">
+                <option value="cash">💵 Cash</option>
+                <option value="qr">📱 QR</option>
+                <option value="card">💳 Card</option>
+              </select>
+            </div>
+          </div>
+          <div class="pos-product-grid" id="posProductGrid"></div>
+          <div class="pos-receipt" id="posReceipt" hidden>
+            <div class="pos-receipt-head">🧾 Order Summary</div>
+            <div id="posReceiptItems"></div>
+            <div class="pos-receipt-total" id="posReceiptTotal"></div>
+            <div class="pos-receipt-actions">
+              <button class="btn btn-ghost" id="posClearBtn">✕ Clear</button>
+              <button class="btn btn-primary grow" id="posConfirmBtn">✅ Confirm &amp; Log Sale</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── ORDERS ── -->
+        <section class="adm-panel" data-panel="orders" hidden>
+          <div class="panel-header">
+            <h2 class="panel-title">Orders &amp; Sales</h2>
+            <button class="btn btn-ghost small" id="exportOrdersBtn">⬇ CSV</button>
+          </div>
+          <div class="sub-tabs" id="ordersSubTabs">
+            <button class="sub-tab active" data-sub="online">Online Orders</button>
+            <button class="sub-tab" data-sub="instore">In-Store Sales</button>
+          </div>
+          <div id="ordersTabContent"></div>
+        </section>
+
+        <!-- ── PRODUCTS ── -->
+        <section class="adm-panel" data-panel="products" hidden>
+          <div class="panel-header">
+            <h2 class="panel-title">Products</h2>
+            <button class="btn btn-primary small" id="addProductBtn">+ Add</button>
+          </div>
+          <div id="adminProductList" class="admin-product-list"></div>
+        </section>
+
+        <!-- ── EXPENSES ── -->
+        <section class="adm-panel" data-panel="expenses" hidden>
+          <div class="panel-header">
+            <h2 class="panel-title">Daily Expenses</h2>
+            <button class="btn btn-ghost small" id="exportExpensesBtn">⬇ CSV</button>
+          </div>
+          <button class="btn btn-primary block" id="addExpenseBtn" style="margin-bottom:16px">+ Add Expense</button>
+          <div class="expense-stats" id="expenseStats"></div>
+          <div class="filter-row">
+            <input type="date" id="expFilterDate" class="filter-input">
+            <select id="expFilterCat" class="filter-select">
+              <option value="">All Categories</option>
+              <option>Fruits</option>
+              <option>Milk</option>
+              <option>Protein / Whey</option>
+              <option>Sugar</option>
+              <option>Electricity</option>
+              <option>Rent</option>
+              <option>Transport</option>
+              <option>Staff Pay</option>
+              <option>Packaging</option>
+              <option>Misc</option>
+            </select>
+            <button class="btn btn-ghost small" id="expFilterClear">✕</button>
+          </div>
+          <div id="expenseList" class="adm-list"></div>
+        </section>
+
+        <!-- ── INVESTMENT ── -->
+        <section class="adm-panel" data-panel="investment" hidden>
+          <div class="panel-header">
+            <h2 class="panel-title">Startup Investment</h2>
+            <button class="btn btn-ghost small" id="exportInvestBtn">⬇ CSV</button>
+          </div>
+          <button class="btn btn-primary block" id="addInvestmentBtn" style="margin-bottom:16px">+ Add Item</button>
+          <div class="invest-stats" id="investStats"></div>
+          <div id="investmentList" class="adm-list"></div>
+        </section>
+
+        <!-- ── ANALYTICS ── -->
+        <section class="adm-panel" data-panel="analytics" hidden>
+          <div class="panel-header">
+            <h2 class="panel-title">Analytics</h2>
+          </div>
+          <div id="analyticsContent"></div>
+        </section>
+
+        <!-- ── SETTINGS ── -->
+        <section class="adm-panel" data-panel="settings" hidden>
+          <div class="panel-header">
+            <h2 class="panel-title">Settings</h2>
+          </div>
+          <form id="settingsForm" class="admin-form wide">
+            <h3 class="settings-group-title">Business Info</h3>
+            <label>App Name
+              <input type="text" id="setAppName" required>
+            </label>
+            <label>WhatsApp Number <small>(with country code, no +)</small>
+              <input type="tel" id="setWhatsapp" required pattern="[0-9]+">
+            </label>
+            <label>Viber Number <small>(optional)</small>
+              <input type="tel" id="setViber">
+            </label>
+            <label>Messenger Username <small>(optional, e.g. yourpage)</small>
+              <input type="text" id="setMessenger">
+            </label>
+            <label>Instagram Username <small>(optional)</small>
+              <input type="text" id="setInstagram">
+            </label>
+            <div class="row">
+              <label class="check-row">
+                <input type="checkbox" id="setDeliveryOn">
+                <span>Enable Delivery Charge</span>
+              </label>
+              <label>Delivery Amount (Rs.)
+                <input type="number" id="setDeliveryAmt" min="0">
+              </label>
+            </div>
+
+            <h3 class="settings-group-title">Admin &amp; Security</h3>
+            <label>Auto-logout after inactivity (minutes)
+              <input type="number" id="setAutoLogout" min="1" max="120" value="10">
+            </label>
+            <label>Change Admin Password <small>(leave blank to keep current)</small>
+              <input type="password" id="setNewPassword" placeholder="New password">
+            </label>
+            <label>Confirm New Password
+              <input type="password" id="setConfirmPassword" placeholder="Repeat new password">
+            </label>
+
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+            <p class="form-success" id="settingsSavedMsg" hidden>✅ Settings saved!</p>
+          </form>
+
+          <div class="danger-zone">
+            <h3>Danger Zone</h3>
+            <p class="muted-text" style="margin-bottom:10px">This will reset all products to factory defaults and cannot be undone.</p>
+            <button class="btn btn-danger small" id="resetProductsBtn">Reset Products to Defaults</button>
+          </div>
+        </section>
+
+      </div><!-- /adm-main -->
+    </div><!-- /admin-screen -->
 
     <!-- ===== TOAST ===== -->
     <div class="toast" id="toast" hidden></div>
 
-    <!-- Supabase JS (CDN) — pure browser, no Node, no build -->
+    <!-- Supabase JS (CDN) — pure browser, no Node -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="./script.js"></script>
   </body>
